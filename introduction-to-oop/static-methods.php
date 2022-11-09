@@ -6,11 +6,12 @@ class Time
     private $m;
 
     // BEGIN (write your solution here)
-    public static function fromString($string)
+    public static function fromString($time)
     {
-        $parts = explode(':', $string);
-        $this->h = $parts[0];
-        $this->m = $parts[1];
+        $parts = explode(':', $time);
+        $hours = $parts[0];
+        $minutes = $parts[1];
+        return new self($hours, $minutes);
     }
     // END
 
@@ -25,6 +26,3 @@ class Time
         return "{$this->h}:{$this->m}";
     }
 }
-
-$time = Time::fromString('10:23');
-echo $time;
