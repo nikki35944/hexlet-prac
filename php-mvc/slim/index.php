@@ -8,16 +8,16 @@ use Slim\Factory\AppFactory;
 $faker = \Faker\Factory::create();
 $faker->seed(1234);
 
+
+
 $domains = [];
 for ($i = 0; $i < 10; $i++) {
     $domains[] = $faker->domainName;
 }
-
 $phones = [];
 for ($i = 0; $i < 10; $i++) {
     $phones[] = $faker->phoneNumber;
 }
-
 
 $app = AppFactory::create();
 $app->addErrorMiddleware(true, true, true);
@@ -40,5 +40,21 @@ $app->get('/domains', function ($request, $response) use ($domains) {
     return $response->write(json_encode($domains));
 });
 
+$app->post('/users', function ($request, $response) {
+    return $response->withStatus(302);
+});
 
+
+$companies = \App\Generator::generate(100);
+
+
+$app->get('/companies', function ($request, $response, $args) use ($companies) {
+    $page = $request->getQueryParam('page', 1);
+    $per = $request->getQueryParam('per', 5);
+
+    $offset = $per * ($page - 1);
+    $result = array_slice($companies, $offset, $per);
+
+    return $response->write(json_encode($result));
+});
 $app->run();
