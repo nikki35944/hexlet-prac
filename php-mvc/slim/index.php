@@ -7,6 +7,8 @@ use Slim\Factory\AppFactory;
 use DI\Container;
 use Illuminate\Support\Collection;
 
+use function Symfony\Component\String\s;
+
 $faker = \Faker\Factory::create();
 $faker->seed(1234);
 
@@ -73,13 +75,15 @@ $app->get('/companies/{id}', function ($request, $response, $args) use ($compani
 // следующей структуры: id, firstName, lastName, email
 $users = \App\UsersGenerator::generate(100);
 
+/*
+ * templates
 $app->get('/users', function ($request, $response) use ($users) {
     $params = [
         'users' => $users,
     ];
 
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
-});
+});*/
 
 $app->get('/users/{id}', function ($request, $response, $args) use ($users) {
     $id = (int) $args['id'];
@@ -91,5 +95,19 @@ $app->get('/users/{id}', function ($request, $response, $args) use ($users) {
     return $this->get('renderer')->render($response, 'users/show.phtml', $params);
 });
 
+$app->get('/users', function ($request, $response) use ($users) {
+
+    $term = $request->getQueryParam('term');
+    $filteredUsers = collect($users)->filter(
+        fn($user) => empty($term) ? true : s($user['firstName'])->ignoreCase()->startsWith($term)
+    );
+
+    $params = [
+        'users' => $filteredUsers,
+        'term' => $term
+    ];
+
+    return $this->get('renderer')->render($response, 'users/index.phtml', $params);
+});
 
 $app->run();
