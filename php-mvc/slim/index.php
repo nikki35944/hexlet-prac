@@ -31,10 +31,7 @@ $app->addErrorMiddleware(true, true, true);
 
 
 $app->get('/', function ($request, $response) {
-    $response->getBody()->write('Welcome to Slim!');
-    return $response;
-    // Благодаря пакету slim/http этот же код можно записать короче
-    // return $response->write('Welcome to Slim!');
+    return $this->get('renderer')->render($response, '/index.phtml');
 });
 
 $app->get('/phones', function ($request, $response) use ($phones) {
@@ -108,6 +105,38 @@ $app->get('/users', function ($request, $response) use ($users) {
     ];
 
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
+});
+
+
+$repo = new App\CourseRepository();
+
+$app->post('/courses', function ($request, $response) use ($repo) {
+    $course = $request->getParsedBodyParam('course');
+
+    $validator = new \App\Validator();
+    $errors = $validator->validate($course);
+
+    if (count($errors) === 0) {
+        $repo->save($course);
+        return $response->withRedirect('/courses');
+    }
+
+    $params = [
+        'course' => $course,
+        'errors' => $errors
+    ];
+
+    return $this->get('renderer')
+        ->render($response->withStatus(422), 'courses/new.phtml', $params);
+});
+
+
+$app->get('/courses/new', function ($request, $response) use ($repo) {
+    $params = [
+        'course' => ['paid' => '', 'title' => ''],
+        'errors' => []
+    ];
+    return $this->get('renderer')->render($response, "courses/new.phtml", $params);
 });
 
 $app->run();
