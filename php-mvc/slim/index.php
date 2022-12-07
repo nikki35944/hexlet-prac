@@ -40,7 +40,6 @@ $app->get('/', function ($request, $response) {
     return $this->get('renderer')->render($response, '/index.phtml');*/
 
     $messages = $this->get('flash')->getMessages();
-    print_r($messages); // => ['success' => ['This is a message']]
 
     $params = ['flash' => $messages];
     return $this->get('renderer')->render($response, 'index.phtml', $params);
@@ -122,7 +121,7 @@ $app->get('/users', function ($request, $response) use ($users) {
 
 $repo = new App\CourseRepository();
 
-$app->get('/courses', function ($request, $response) use ($repo) {
+$app->post('/courses', function ($request, $response) use ($repo) {
     /*post-form
      * $course = $request->getParsedBodyParam('course');
 

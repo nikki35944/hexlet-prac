@@ -1,2 +1,13 @@
-<a href="/courses">Курсы</a>
-<a href="/users">Пользователи</a>
+<?php if (count($flash) > 0) : ?>
+    <ul>
+        <?php foreach ($flash as $messages) : ?>
+            <?php foreach ($messages as $message) : ?>
+                <li><?= $message ?></li>
+            <?php endforeach ?>
+        <?php endforeach ?>
+    </ul>
+<?php endif ?>
+<div>
+    <a href="/courses">Курсы</a>
+    <a href="/users">Пользователи</a>
+</div>
