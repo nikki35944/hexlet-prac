@@ -26,12 +26,24 @@ $container->set('renderer', function () {
     // Параметром передается базовая директория, в которой будут храниться шаблоны
     return new \Slim\Views\PhpRenderer(__DIR__ . '/templates');
 });
-$app = AppFactory::createFromContainer($container);
+$container->set('flash', function () {
+    return new \Slim\Flash\Messages();
+});
+AppFactory::setContainer($container);
+$app = AppFactory::create();
 $app->addErrorMiddleware(true, true, true);
 
 
 $app->get('/', function ($request, $response) {
-    return $this->get('renderer')->render($response, '/index.phtml');
+    /*$this->get('flash')->addMessage('success', 'This is a message');
+
+    return $this->get('renderer')->render($response, '/index.phtml');*/
+
+    $messages = $this->get('flash')->getMessages();
+    print_r($messages); // => ['success' => ['This is a message']]
+
+    $params = ['flash' => $messages];
+    return $this->get('renderer')->render($response, 'index.phtml', $params);
 });
 
 $app->get('/phones', function ($request, $response) use ($phones) {
@@ -110,8 +122,9 @@ $app->get('/users', function ($request, $response) use ($users) {
 
 $repo = new App\CourseRepository();
 
-$app->post('/courses', function ($request, $response) use ($repo) {
-    $course = $request->getParsedBodyParam('course');
+$app->get('/courses', function ($request, $response) use ($repo) {
+    /*post-form
+     * $course = $request->getParsedBodyParam('course');
 
     $validator = new \App\Validator();
     $errors = $validator->validate($course);
@@ -127,7 +140,10 @@ $app->post('/courses', function ($request, $response) use ($repo) {
     ];
 
     return $this->get('renderer')
-        ->render($response->withStatus(422), 'courses/new.phtml', $params);
+        ->render($response->withStatus(422), 'courses/new.phtml', $params);*/
+    $this->get('flash')->addMessage('success', 'Course Added');
+
+    return $response->withRedirect('/');
 });
 
 
