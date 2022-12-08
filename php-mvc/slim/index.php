@@ -154,4 +154,33 @@ $app->get('/courses/new', function ($request, $response) use ($repo) {
     return $this->get('renderer')->render($response, "courses/new.phtml", $params);
 });
 
+
+$repo = new App\PostRepository();
+
+$app->get('/posts', function ($request, $response) use ($repo) {
+    $posts = $repo->all();
+
+    $per = 5;
+    $page = $request->getQueryParam('page', 1);
+    $offset = $per * ($page - 1);
+    $postsPerPage = array_slice($posts, $offset, $per);
+
+
+    $params = [
+        'posts' => $postsPerPage,
+        'page' => $page
+    ];
+    return $this->get('renderer')->render($response, 'posts/index.phtml', $params);
+});
+
+$app->get('/posts/{id}', function ($request, $response, $args) use ($repo) {
+
+    $id = $args['id'];
+    $post = $repo->find($id);
+
+    $params = [
+        'post' => $post
+    ];
+    return $this->get('renderer')->render($response, 'posts/show.phtml', $params);
+});
 $app->run();
