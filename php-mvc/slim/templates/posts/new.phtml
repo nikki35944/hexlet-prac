@@ -1,0 +1,21 @@
+<a href="/posts">Posts</a>
+
+<form action="/posts" method="post">
+    <label>
+        Title
+        <input type="text" name="post[name]" value="<?= htmlspecialchars($postData['name'] ?? '') ?>">
+        <?php if (isset($errors['name'])) :  ?>
+            <div><?= $errors['name'] ?></div>
+        <?php endif; ?>
+    </label>
+    <div>
+        <label>
+            Text
+            <textarea name="post[body]" cols="30" rows="10" <?= htmlspecialchars($postData['body'] ?? '') ?>></textarea>
+            <?php if (isset($errors['body'])) :  ?>
+                <div><?= $errors['body'] ?></div>
+            <?php endif; ?>
+        </label>
+    </div>
+    <input type="submit" value="Add post">
+</form>

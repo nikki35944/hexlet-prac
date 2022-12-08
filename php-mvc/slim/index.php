@@ -155,32 +155,47 @@ $app->get('/courses/new', function ($request, $response) use ($repo) {
 });
 
 
-$repo = new App\PostRepository();
+$repo = new \App\PostRepository();
+$router = $app->getRouteCollector()->getRouteParser();
+
 
 $app->get('/posts', function ($request, $response) use ($repo) {
-    $posts = $repo->all();
-
-    $per = 5;
-    $page = $request->getQueryParam('page', 1);
-    $offset = $per * ($page - 1);
-    $postsPerPage = array_slice($posts, $offset, $per);
-
+    $flash = $this->get('flash')->getMessages();
 
     $params = [
-        'posts' => $postsPerPage,
-        'page' => $page
+        'flash' => $flash,
+        'posts' => $repo->all()
     ];
     return $this->get('renderer')->render($response, 'posts/index.phtml', $params);
-});
+})->setName('posts');
 
-$app->get('/posts/{id}', function ($request, $response, $args) use ($repo) {
+$app->post('/posts', function ($request, $response) use ($repo, $router) {
+    $postData = $request->getParsedBodyParam('post');
 
-    $id = $args['id'];
-    $post = $repo->find($id);
+    $validator = new \App\PostValidator();
+    $errors = $validator->validate($postData);
+
+    if (count($errors) === 0) {
+        $repo->save($postData);
+        $this->get('flash')->addMessage('success', 'Post has been created');
+        return $response->withRedirect($router->urlFor('posts'));
+    }
 
     $params = [
-        'post' => $post
+        'postData' => $postData,
+        'errors' => $errors
     ];
-    return $this->get('renderer')->render($response, 'posts/show.phtml', $params);
+    $response = $response->withStatus(422);
+    return $this->get('renderer')->render($response, 'posts/new.phtml', $params);
 });
+
+$app->get('/posts/new', function ($request, $response) use ($repo) {
+
+    $params = [
+        'post' => [],
+        'errors' => []
+    ];
+    return $this->get('renderer')->render($response, 'posts/new.phtml', $params);
+});
+
 $app->run();
